@@ -1,0 +1,14 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: banquemisr-cloud-config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:///E:/apps-demos/banquemisr-challenge05-app-config-server/banquemisr.challenge05-app-config
+          force-pull: true # pull the latest code from GIT in case the local repo has some issues and couldn't able to update the repo
+          skipSslValidation: true # Git Server SSL validation can be disabled
+          timeout: 10 #HTTP connection timeout (In Seconds)
+          default-label: master
