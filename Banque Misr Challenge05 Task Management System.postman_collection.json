@@ -1,0 +1,406 @@
+{
+	"info": {
+		"_postman_id": "3b10526a-9a52-4df9-8df7-7f7e01ccdaa8",
+		"name": "Banque Misr Challenge05 Task Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29889121"
+	},
+	"item": [
+		{
+			"name": "banquemisr.challenge05.task.management.service",
+			"item": [
+				{
+					"name": "get-tasks",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS2dIQ0hPS2VYNU1NR2ctczJfanR2YmZBd2lFdmhfOGNiSTlpN0F3VTZnIn0.eyJleHAiOjE3Mjg3NjI5NzgsImlhdCI6MTcyODc2MjM3OCwianRpIjoiNTgzZjFiODUtMTc5MC00OTA0LWJiYTctN2VmMGI4NzBhNjY3IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjQ3NDEyNDQtNTZhMC00N2Y0LWI1MWYtYTYwMzQ1NzZiZWM3IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYmFucXVlbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQtY2xpZW50Iiwic2lkIjoiNGFhNzA5Y2YtM2E0OS00NGU1LWJhNzUtMGY3OGNiNTc2ZDcwIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsicmVndWxhci11c2VyIiwiZGVmYXVsdC1yb2xlcy1iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiTWFobW91ZCBZYWhpYSIsInByZWZlcnJlZF91c2VybmFtZSI6Im15YWhpYSIsImdpdmVuX25hbWUiOiJNYWhtb3VkIiwiZmFtaWx5X25hbWUiOiJZYWhpYSIsImVtYWlsIjoiZW5nLmFib3lhaGlhQGdtYWlsLmNvbSJ9.jcRn0M9FjvXCpX0wCaCdRl4FlgbokkDl5eQQouDtzDShyGBvFPwe-T9OCPlFXMvpzYAfMibdw1BN2l67YdvhenSDzmzgCnzdHPClO3Daw8nj5ka2Z0OKHOlPfsbyp9XUd6B0_6cHgBLBblwjnPVU-_diZFBANcCEqR-t50UfTIzokz7GfJbnhO4Imv4S2K6urA-XpDZFHmV0pldrblop23Jt47IGX5X1_UghI2ulkEwKZcvIBZUecFiieoh2LWbIK0_PwnTy7KSuAHqlbrOhB-4fgD20n8sZPxDI43LIUKro_PiKl71gp8-QfDCvfg29eYffGs75XH28hXtXpGOmVA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8888/banque-misr-task-management-service/get-tasks?taskTitle=t1&taskDueDateFrom=2024-10-20T00:00:00.000+00:00&taskDueDateTo=2024-10-22T01:00:00.000+00:00&page=1&sizePerPage=100",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"banque-misr-task-management-service",
+								"get-tasks"
+							],
+							"query": [
+								{
+									"key": "taskTitle",
+									"value": "t1"
+								},
+								{
+									"key": "taskStatus",
+									"value": "TODO",
+									"disabled": true
+								},
+								{
+									"key": "taskDesc",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "taskDueDateFrom",
+									"value": "2024-10-20T00:00:00.000+00:00"
+								},
+								{
+									"key": "taskDueDateTo",
+									"value": "2024-10-22T01:00:00.000+00:00"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sizePerPage",
+									"value": "100"
+								},
+								{
+									"key": "displayAll",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-tasks-history",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS2dIQ0hPS2VYNU1NR2ctczJfanR2YmZBd2lFdmhfOGNiSTlpN0F3VTZnIn0.eyJleHAiOjE3Mjg2MDQ0ODcsImlhdCI6MTcyODYwMzg4NywianRpIjoiODIxNDNhNDctNDUxMC00NzJhLTk2MzMtYjQxYzk3N2JiMzRjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMDgzMzIxMDAtNWY5NS00MWQ2LTk3ZWQtNWIzZGE5MWE3MzgzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYmFucXVlbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQtY2xpZW50Iiwic2lkIjoiYTliNmQ0ZGItNGVkNS00OTJjLWJjYzQtYTJjNjM1YWQyNWMwIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsicmVndWxhci11c2VyIiwiZGVmYXVsdC1yb2xlcy1iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJvZmZsaW5lX2FjY2VzcyIsImFkbWluLXVzZXIiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6Ik1haG1vdWQgWWFoaWEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJteWFoaWEtYWRtaW4iLCJnaXZlbl9uYW1lIjoiTWFobW91ZCIsImZhbWlseV9uYW1lIjoiWWFoaWEiLCJlbWFpbCI6Im0uaC55YWhpYTAwN0BnbWFpbC5jb20ifQ.j8MWAerbkUnnOpINaq8fu8hqPfMcaWgU2016Zug_5umGN8-3h1hmVggY1XAWm89r7_qfXods2yDebI98ktOkX6RtoH1bQaysObv2xD_2hsfVNmLb9VUclWm5cJ2AObySSQbYDSP8pQS6kedQrIe5mFR1UVlSajl9fyEV8BUThpFvkrLiiJOyLvOpYhq0K5ANC4J5pRWlKK9avon9_COrQ5-FYUNm5z98nom_w4iN559Pkjnn7iph5UURMJ5ToQ-Mr6TmezXbXuUZROlboB-mOKWmFNAilUCPWDw2d9a4w8M2jiu5lTbQDYLYlQapeNigcCsKJMCXOZkbR3MA6EzC9A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8888/banque-misr-task-management-service/get-tasks-history?page=1&sizePerPage=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"banque-misr-task-management-service",
+								"get-tasks-history"
+							],
+							"query": [
+								{
+									"key": "taskTitle",
+									"value": "Task2",
+									"disabled": true
+								},
+								{
+									"key": "taskStatus",
+									"value": "TODO",
+									"disabled": true
+								},
+								{
+									"key": "taskDesc",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "taskDueDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sizePerPage",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create-task",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS2dIQ0hPS2VYNU1NR2ctczJfanR2YmZBd2lFdmhfOGNiSTlpN0F3VTZnIn0.eyJleHAiOjE3Mjg1MTk2NTIsImlhdCI6MTcyODUxOTA1MiwianRpIjoiN2I2ZDdkZTMtMWMzMS00MDIxLTk5NjMtZDEwZDgyZjg1ZTY5IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjQ3NDEyNDQtNTZhMC00N2Y0LWI1MWYtYTYwMzQ1NzZiZWM3IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYmFucXVlbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQtY2xpZW50Iiwic2lkIjoiYWQ4NTIwOGUtMjRkMC00OGE4LWE5NTctOGJmZjM1NDgyZTJlIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsicmVndWxhci11c2VyIiwiZGVmYXVsdC1yb2xlcy1iYW5xdWUtbWlzci1jaGFsbGVuZ2UwNS10YXNrLW1hbmFnZW1lbnQucmVhbG0iLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiTWFobW91ZCBZYWhpYSIsInByZWZlcnJlZF91c2VybmFtZSI6Im15YWhpYSIsImdpdmVuX25hbWUiOiJNYWhtb3VkIiwiZmFtaWx5X25hbWUiOiJZYWhpYSIsImVtYWlsIjoiZW5nLmFib3lhaGlhQGdtYWlsLmNvbSJ9.AIDr5gfj_Ff3ULVr8Jf8w7ypxL-D2fVWc9xz1pgq8L1lxUGejpreHXz6ABVaBYJxArAQpgTOchGR4julYZ74jEsMlUItTvHS8y7nBHHULV0yE7V-jHqVeK-mRxcaqdFbtwYof73_ANcoqCXwBA4M9lb3BcuCLgltmRtBAOXr-UZULTiMA6YFGp48Z66OPkl57D1qLieO2ayf9sVopfZnsmu0PpuN_fZnBhnQXiw5txlnx5e5qugvDPedEsBLuFYyJhnOC8-M6GqMqMJWMYnFrWf4j26BUNJJ7jwMxUWE9y8uWPYRIQw5edmAQmXMj2m9YesBdATfRTMDloNVYfGzFg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"t20\",\r\n    \"description\": \"task 20\",\r\n    \"status\": \"TODO\",\r\n    \"priority\": \"HIGH\",\r\n    \"dueDate\": \"2024-10-18T01:00:00.000+00:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/banque-misr-task-management-service/create-task",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"banque-misr-task-management-service",
+								"create-task"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-task",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Task2\",\r\n    \"description\": \"\",\r\n    \"status\": \"TODO\",\r\n    \"priority\": \"HIGH\",\r\n    \"dueDate\": \"2024-09-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/banque-misr-task-management-service/update-task",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"banque-misr-task-management-service",
+								"update-task"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-task",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Task2\",\r\n    \"description\": \"\",\r\n    \"status\": \"TODO\",\r\n    \"priority\": \"HIGH\",\r\n    \"dueDate\": \"2024-09-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/banque-misr-task-management-service/delete-task",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"banque-misr-task-management-service",
+								"delete-task"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "openid",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{keycloak-url}}/realms/{{realm}}/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"{{keycloak-url}}"
+							],
+							"path": [
+								"realms",
+								"{{realm}}",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
