@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>banquemisr.challenge05.task.management.system</groupId>
+    <artifactId>banquemisr-challenge05-task-management-system</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>banquemisr-challenge05-task-management-system</name>
+    <description>Task Management System for banquemisr</description>
+    <modules>
+        <module>banquemisr-challenge05-discovery-server</module>
+        <module>banquemisr-challenge05-api-gateway</module>
+        <module>banquemisr-challenge05-cloud-config-server</module>
+        <module>banquemisr-challenge05-email-service</module>
+        <module>banquemisr-challenge05-task-management-service</module>
+
+    </modules>
+    <properties>
+        <java.version>17</java.version>
+        <java.compiler.resource>17</java.compiler.resource>
+        <java.compiler.target>17</java.compiler.target>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
