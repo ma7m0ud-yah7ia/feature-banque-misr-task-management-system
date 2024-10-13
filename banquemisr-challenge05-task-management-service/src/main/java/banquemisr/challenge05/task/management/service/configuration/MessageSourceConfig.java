@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.io.IOException;
 
@@ -29,13 +28,6 @@ public class MessageSourceConfig {
         messageSource.setBasename(messageBaseName);
         messageSource.setDefaultEncoding(defaultEncoding);
         return messageSource;
-    }
-
-    @Bean
-    public LocalValidatorFactoryBean localValidatorFactoryBean() {
-        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
-        bean.setValidationMessageSource(messageSource());
-        return bean;
     }
 
     @Bean("messages")

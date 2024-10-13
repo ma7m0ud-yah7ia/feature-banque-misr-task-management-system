@@ -10,9 +10,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @RequiredArgsConstructor
-public class TasksSearchResponseDTO extends GeneralResponseDTO{
+public class TasksSearchResponseDTO extends GeneralPageableDTO {
     private List<TaskDTO> tasks = new ArrayList<>();
-    private int page;
-    private int totalPages;
-    private int totalSize;
 }

@@ -10,13 +10,11 @@ import org.springframework.http.HttpStatus;
 @Data
 public class ErrorResponse extends GeneralResponseDTO {
 
-    private ErrorDetails errorDetails = new ErrorDetails();
+    private Error error = new Error();
 
-    public ErrorResponse(HttpStatus status, int statusCode, String error, String message, String details) {
-        this.setStatus(status);
-        this.getErrorDetails().setError(error);
-        this.setMessage(message);
-        this.setStatusCode(statusCode);
-        this.getErrorDetails().setDetails(details);
+    public ErrorResponse(HttpStatus status, int statusCode, String error, String details) {
+        super(status, statusCode);
+        this.getError().setErrorMessage(error);
+        this.getError().setErrorDetails(details);
     }
 }

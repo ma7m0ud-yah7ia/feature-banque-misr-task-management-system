@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="banquemisr-challenge05-email-service" />
+        <module name="banquemisr-challenge05-cloud-config-server" />
+        <module name="banquemisr-challenge05-discovery-server" />
+        <module name="banquemisr-challenge05-api-gateway" />
+        <module name="banquemisr-challenge05-task-management-service" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="banquemisr-challenge05-common-security-module" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="banquemisr-challenge05-api-gateway" options="-parameters" />
+      <module name="banquemisr-challenge05-cloud-config-server" options="-parameters" />
+      <module name="banquemisr-challenge05-common-security-module" options="-parameters" />
+      <module name="banquemisr-challenge05-discovery-server" options="-parameters" />
+      <module name="banquemisr-challenge05-email-service" options="-parameters" />
+      <module name="banquemisr-challenge05-task-management-service" options="-parameters" />
+    </option>
+  </component>
+</project>

@@ -4,10 +4,7 @@ import banquemisr.challenge05.task.management.service.enums.TaskPriority;
 import banquemisr.challenge05.task.management.service.enums.TaskStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.index.TextIndexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -17,11 +14,9 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Document(collection = "Tasks")
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class Task extends BaseModel {
 
-    @TextIndexed
-    @Indexed(name = "title_unique_index", unique = true)
     @Field(name = "title", targetType = FieldType.STRING)
     private String title;
 
@@ -37,9 +32,14 @@ public class Task extends BaseModel {
     @Field(name = "dueDate", targetType = FieldType.DATE_TIME)
     private Date dueDate;
 
-    @DBRef
-    private AppUser user;
+    private Notification notification = new Notification();
 
-    @Field(name = "isDeleted", targetType = FieldType.BOOLEAN)
-    private boolean isDeleted = false;
+    public Task(Task task) {
+        this.setTitle(task.getTitle());
+        this.setDescription(task.getDescription());
+        this.setStatus(task.getStatus());
+        this.setPriority(task.getPriority());
+        this.setDueDate(task.getDueDate());
+        this.setNotification(task.getNotification());
+    }
 }

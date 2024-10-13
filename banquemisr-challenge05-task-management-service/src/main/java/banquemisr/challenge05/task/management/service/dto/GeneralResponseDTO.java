@@ -7,20 +7,15 @@ import java.time.LocalDateTime;
 
 @Data
 public class GeneralResponseDTO {
-    private LocalDateTime timestamp;
+    private String timestamp = LocalDateTime.now().toString();
     private HttpStatus status = HttpStatus.OK;
     private int statusCode = HttpStatus.OK.value();
-    private String message;
 
     public GeneralResponseDTO() {
-        this.timestamp = LocalDateTime.now();
     }
 
-    public GeneralResponseDTO(HttpStatus status, String message, int statusCode) {
-        setTimestamp(LocalDateTime.now());
+    public GeneralResponseDTO(HttpStatus status, int statusCode) {
         setStatus(status);
         setStatusCode(statusCode);
-        setMessage(message);
     }
-
 }

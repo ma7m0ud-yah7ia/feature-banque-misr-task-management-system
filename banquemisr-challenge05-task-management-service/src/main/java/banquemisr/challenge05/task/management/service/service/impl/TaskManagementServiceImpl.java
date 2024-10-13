@@ -1,95 +1,132 @@
 package banquemisr.challenge05.task.management.service.service.impl;
 
-import banquemisr.challenge05.task.management.service.Util.TasksMapper;
+import banquemisr.challenge05.task.management.service.dao.impl.TaskDaoImpl;
 import banquemisr.challenge05.task.management.service.dto.*;
-import banquemisr.challenge05.task.management.service.exceptions.TasksDuplicateKeyException;
-import banquemisr.challenge05.task.management.service.model.AppUser;
+import banquemisr.challenge05.task.management.service.enums.Roles;
+import banquemisr.challenge05.task.management.service.exception.InvalidDataException;
+import banquemisr.challenge05.task.management.service.exception.TaskRequestInputException;
+import banquemisr.challenge05.task.management.service.model.LoginUser;
 import banquemisr.challenge05.task.management.service.model.Task;
-import banquemisr.challenge05.task.management.service.repository.TaskRepository;
+import banquemisr.challenge05.task.management.service.model.TaskHistory;
 import banquemisr.challenge05.task.management.service.service.TaskManagementService;
+import banquemisr.challenge05.task.management.service.util.StringDateConverters;
+import banquemisr.challenge05.task.management.service.util.TasksMapper;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static banquemisr.challenge05.task.management.service.enums.DateFormats.GENERAL_DATE_TIME_FORMAT;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TaskManagementServiceImpl implements TaskManagementService {
 
-    private final TaskRepository taskRepository;
     private final TasksMapper tasksMapper;
+    private final UserServiceImpl userService;
 
     @Resource(name = "messages_bundle")
     private final MessageSource messageSource;
 
     private final KafkaTemplate<String, TaskEventDTO> kafkaTemplate;
 
+    private final TaskDaoImpl taskDao;
+
     @Value("${spring.kafka.template.default-topic}")
     private String kafkaDefaultTopic;
 
-    public TaskResponseDTO createTask(TaskRequestDTO tasksRequestDTO, String lang) throws TasksDuplicateKeyException {
-        TaskResponseDTO tasksResponseDTO = saveTask(tasksRequestDTO);
-        Locale locale = new Locale(lang);
-        tasksResponseDTO.setMessage(messageSource.getMessage("message.task.created.successfully", null, locale));
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, String lang) {
+
+        validateCreateTaskRequestParams(taskRequestDTO);
+
+        Task taskObj = prepareTaskForSave(taskRequestDTO, userService.getLoginUser());
+        Task savedTask = taskDao.saveTask(taskObj, lang);
+
+        log.info("Task with title: {}, saved successfully with exposedId: {}", savedTask.getTitle(), savedTask.getExposedId());
+        TaskResponseDTO tasksResponseDTO = tasksMapper.mapTaskModelToTasksResponseDTO(savedTask);
+
+        tasksResponseDTO.setMessage(messageSource.getMessage("message.task.created.successfully", null, new Locale(lang)));
+
         return tasksResponseDTO;
     }
 
-    public TaskResponseDTO updateTask(TaskRequestDTO taskRequestDTO) {
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    public TaskResponseDTO updateTask(TaskRequestDTO taskRequestDTO, String lang) throws Exception {
 
-        AppUserDTO appUserDTO = new AppUserDTO();
+        validateUpdateTaskRequestParams(taskRequestDTO);
 
-        Task taskObj = taskRepository.findByTitle(taskRequestDTO.getTitle());
+        Task taskObj = prepareTaskForUpdate(taskRequestDTO, userService.getLoginUser());
 
-        AppUser user = tasksMapper.mapAppUserDTOToAppUser(appUserDTO);
-        taskObj.setUpdatedAt(new Date());
-        taskObj.setUpdatedBy(user);
+        Map<String, String> updateFlags = checkUpdateFlags(taskObj, taskRequestDTO);
 
         TaskResponseDTO tasksResponseDTO = tasksMapper.mapTaskModelToTasksResponseDTO(
-                taskRepository.update(tasksMapper.mapTasksRequestDTOToTaskModel(taskRequestDTO, taskObj)));
+                taskDao.updateTask(tasksMapper.mapTasksRequestDTOToTaskModel(taskRequestDTO, taskObj), userService.getLoginUser(), lang));
 
-        //BEGIN
-        String bodyMessage = "The task with Title: " + tasksResponseDTO.getTask().getTitle() + ", its dueDate changed from: " + taskObj.getDueDate() + "to: " + tasksResponseDTO.getTask().getDueDate();
-
-        sendEmail("m.h.yahia007@gmail.com", bodyMessage);
-        // END
-        if (!Objects.equals(taskObj.getDueDate(), taskRequestDTO.getDueDate())) {
-            //TODO: Send email
-            //            String bodyMessage = "The task with Title: " + tasksResponseDTO.getTask().getTitle() +
-            //                    ", its dueDate changed from: " + taskObj.getDueDate() + "to: " + tasksResponseDTO.getTask().getDueDate();
-            //            sendEmail("m.h.yahia007@gmail.com",bodyMessage);
+        // if the update occurred by the admin, email the task creator
+        if (!updateFlags.isEmpty()) {
+            sendEmail(taskObj, tasksResponseDTO, updateFlags);
+            log.info("Task of exposedId: {}, sent updates to email-service successfully", taskObj.getExposedId());
         }
 
-        if (!Objects.equals(taskObj.getPriority(), taskRequestDTO.getPriority())) {
-            //TODO: Send email
-            //            String bodyMessage = "The task with Title: " + tasksResponseDTO.getTask().getTitle() +
-            //                    ", its priority changed from: " + taskObj.getPriority() + "to: " + tasksResponseDTO.getTask().getPriority();
-            //            sendEmail("",bodyMessage);
-        }
-        tasksResponseDTO.setMessage("Task updated successfully..!");
+        tasksResponseDTO.setMessage(messageSource.getMessage("message.task.updated.successfully", null, new Locale(lang)));
+        return tasksResponseDTO;
+    }
 
+
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    public TaskResponseDTO deleteTask(String exposedId, String lang) {
+
+        // Admin can't delete the task.
+        Optional<Task> taskChecker = taskDao.findByExposedIdAndUser(exposedId, userService.getLoginUser());
+
+        if (taskChecker.isEmpty()) {
+            throw new InvalidDataException("message.error.task.not.found");
+        }
+
+        TaskResponseDTO tasksResponseDTO = tasksMapper.mapTaskModelToTasksResponseDTO(taskDao.deletTask(taskChecker.get(), userService.getLoginUser(), lang));
+
+        log.info("Task of exposedId: {}, deleted successfully", exposedId);
+        tasksResponseDTO.setMessage(messageSource.getMessage("message.task.deleted.successfully", null, new Locale(lang)));
         return tasksResponseDTO;
 
     }
 
-    private void sendEmail(String emailTo, String bodyMessage) {
-        kafkaTemplate.send(kafkaDefaultTopic, new TaskEventDTO());
-    }
-
-    public TasksSearchResponseDTO getTaskByCriteria(String taskTitle, String taskStatus, String taskDesc, String taskDueDate, int page, int sizePerPage) {
+    @Cacheable(value = "tasks", keyGenerator = "customKeyGenerator")
+    @Override
+    public TasksSearchResponseDTO getTaskByCriteria(String taskTitle, String taskStatus, String taskPriority, String taskDesc,
+                                                    Date taskDueDateFrom, Date taskDueDateTo, boolean displayAll, int page, int sizePerPage) {
         int pageNumber = page - 1;
-        Page<Task> tasksPage = taskRepository.findByTitleDescStatusDueDate(taskTitle, taskStatus, taskDesc, taskDueDate, false, PageRequest.of(pageNumber, sizePerPage, Sort.by("dueDate").descending()));
+
+        Page<Task> tasksPage = taskDao.findByTitleDescStatusPriorityDueDate(
+                taskTitle,
+                taskStatus,
+                taskPriority,
+                taskDesc,
+                taskDueDateFrom,
+                taskDueDateTo,
+                checkUserIfAdminOrNot(userService.getLoginUser()), displayAll, userService.getLoginUser(),
+                PageRequest.of(pageNumber, sizePerPage, Sort.by("dueDate").descending()));
+
         TasksSearchResponseDTO tasksSearchResponseDTO = new TasksSearchResponseDTO();
+
         tasksPage.getContent().forEach(task -> {
             tasksSearchResponseDTO.getTasks().add(tasksMapper.mapTaskModelToTasksResponseDTO(task).getTask());
         });
@@ -97,30 +134,157 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         tasksSearchResponseDTO.setPage(page);
         tasksSearchResponseDTO.setTotalPages(tasksPage.getTotalPages());
         tasksSearchResponseDTO.setTotalSize((int) tasksPage.getTotalElements());
+
         return tasksSearchResponseDTO;
     }
 
-    @Transactional
-    public TaskResponseDTO deleteTask(TaskRequestDTO tasksRequestDTO) {
-        Task task = taskRepository.findByTitle(tasksRequestDTO.getTitle());
-        TaskResponseDTO tasksResponseDTO = tasksMapper.mapTaskModelToTasksResponseDTO(taskRepository.delete(task));
-        tasksResponseDTO.setMessage("Task deleted successfully..!");
-        return tasksResponseDTO;
+    @Cacheable(value = "taskHistory", keyGenerator = "customKeyGenerator")
+    @Override
+    public TasksHistorySearchResponseDTO getTaskHistoryByCriteria(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, int page, int sizePerPage) {
+
+        int pageNumber = page - 1;
+        Page<TaskHistory> tasksPage = taskDao.findByTaskTitleAndDueDate(
+                taskTitle,
+                taskDueDateFrom, taskDueDateTo, PageRequest.of(pageNumber, sizePerPage, Sort.by("dueDate").descending()));
+        TasksHistorySearchResponseDTO tasksHistorySearchResponseDTO = new TasksHistorySearchResponseDTO();
+        tasksPage.getContent().forEach(taskHistory -> {
+            tasksHistorySearchResponseDTO.getTasksHistory().add(tasksMapper.mapTaskHistoryModelToTaskHistoryResponseDTO(taskHistory));
+        });
+
+        tasksHistorySearchResponseDTO.setPage(page);
+        tasksHistorySearchResponseDTO.setTotalPages(tasksPage.getTotalPages());
+        tasksHistorySearchResponseDTO.setTotalSize((int) tasksPage.getTotalElements());
+
+        return tasksHistorySearchResponseDTO;
 
     }
 
-    private TaskResponseDTO saveTask(TaskRequestDTO tasksRequestDTO) {
-        Task taskObj = Objects.requireNonNull(tasksMapper.mapTasksRequestDTOToTaskModel(tasksRequestDTO));
-        AppUserDTO appUserDTO = new AppUserDTO();
+    private Task prepareTaskForUpdate(TaskRequestDTO taskRequestDTO, LoginUser user) {
 
-        AppUser appUser = tasksMapper.mapAppUserDTOToAppUser(appUserDTO);
+        if (taskRequestDTO.getExposedId() == null || taskRequestDTO.getExposedId().isEmpty() || taskRequestDTO.getExposedId().isBlank()) {
+            throw new InvalidDataException("message.error.exposedId.input");
+        }
+        // Check if the user is admin or not
+        Task task = getTaskByUserPrivilege(checkUserIfAdminOrNot(userService.getLoginUser()), userService.getLoginUser(), taskRequestDTO.getExposedId());
 
-        taskObj.setUser(appUser);
-        taskObj.setCreatedBy(appUser);
-        taskObj.setCreatedAt(new Date());
+        if (task == null) {
+            throw new InvalidDataException("message.error.task.update.validation");
+        }
+
+        task.setUpdatedAt(new Date());
+        task.setUpdatedBy(user);
+
+        return task;
+    }
+
+    private Task prepareTaskForSave(TaskRequestDTO taskRequestDTO, LoginUser user) {
+        Task taskObj = Objects.requireNonNull(tasksMapper.mapTasksRequestDTOToTaskModel(taskRequestDTO));
         taskObj.setExposedId(UUID.randomUUID().toString());
+        taskObj.setCreatedBy(user);
+        taskObj.setCreatedAt(new Date());
 
-        taskRepository.save(taskObj);
-        return tasksMapper.mapTaskModelToTasksResponseDTO(taskObj);
+        return taskObj;
     }
+
+    private boolean checkUserIfAdminOrNot(LoginUser user) {
+        return !user.getGrantedAuthorities().stream()
+                .filter(grantedAuth -> Roles.ADMIN.getValue().trim().equals(grantedAuth.trim())).collect(Collectors.toSet()).isEmpty();
+    }
+
+    private Task getTaskByUserPrivilege(boolean isAdmin, LoginUser user, String exposedId) {
+        Optional<Task> taskChecker = Optional.of(new Task());
+        if (isAdmin) {
+            taskChecker = taskDao.findByExposedIdAndUser(exposedId, null);
+        } else {
+            taskChecker = taskDao.findByExposedIdAndUser(exposedId, user);
+        }
+        return taskChecker.orElse(null);
+    }
+
+
+    private void sendEmail(Task taskObj,
+                           TaskResponseDTO tasksResponseDTO,
+                           Map<String, String> updateFlags) {
+        kafkaTemplate.send(kafkaDefaultTopic, new TaskEventDTO(
+                taskObj.getCreatedBy().getEmail()
+                , taskObj.getTitle()
+                , tasksResponseDTO.getTask().getPriority().name()
+                , tasksResponseDTO.getTask().getDueDate().toString()
+                , taskObj.getCreatedBy().getUserFullName()
+                , taskObj.getCreatedBy().getUsername()
+                , updateFlags));
+    }
+
+    private Map<String, String> checkUpdateFlags(Task taskObj, TaskRequestDTO taskRequestDTO) {
+
+        Map<String, String> updateFlags = new HashMap<>();
+
+        if (!taskObj.getCreatedBy().equals(taskObj.getUpdatedBy())) {
+            if (taskObj.getTitle() != null && !taskObj.getTitle().equals(taskRequestDTO.getTitle())) {
+                updateFlags.put("oldTitle", taskObj.getTitle());
+                updateFlags.put("newTitle", taskRequestDTO.getTitle());
+            }
+
+            if (taskObj.getPriority() != null && !taskObj.getPriority().equals(taskRequestDTO.getPriority())) {
+                updateFlags.put("oldPriority", taskObj.getPriority().name());
+                updateFlags.put("newPriority", taskRequestDTO.getPriority().name());
+            }
+
+            if (taskObj.getPriority() != null && !taskObj.getPriority().equals(taskRequestDTO.getPriority())) {
+                updateFlags.put("oldPriority", taskObj.getPriority().name());
+                updateFlags.put("newPriority", taskRequestDTO.getPriority().name());
+            }
+
+            if (taskObj.getStatus() != null && !taskObj.getStatus().equals(taskRequestDTO.getStatus())) {
+                updateFlags.put("oldStatus", taskObj.getStatus().name());
+                updateFlags.put("newStatus", taskRequestDTO.getStatus().name());
+            }
+
+            if (taskObj.getDueDate() != null && !taskObj.getDueDate().equals(taskRequestDTO.getDueDate())) {
+                updateFlags.put("oldDueDate", StringDateConverters.convertDateToString(taskObj.getDueDate(), GENERAL_DATE_TIME_FORMAT.getValue()));
+                updateFlags.put("newDueDate", StringDateConverters.convertDateToString(taskRequestDTO.getDueDate(), GENERAL_DATE_TIME_FORMAT.getValue()));
+            }
+        }
+        return updateFlags;
+    }
+
+    private void validateCreateTaskRequestParams(TaskRequestDTO taskRequestDTO) {
+        List<String> errorMessages = new ArrayList<>();
+
+        if (StringUtils.isBlank(taskRequestDTO.getTitle())) {
+            errorMessages.add("message.error.title.input");
+        }
+        if (taskRequestDTO.getStatus() == null) {
+            errorMessages.add("message.error.status.input");
+        }
+
+        if (taskRequestDTO.getPriority() == null) {
+            errorMessages.add("message.error.priority.input");
+        }
+
+        if (taskRequestDTO.getDueDate() == null) {
+            errorMessages.add("message.error.dueDate.input");
+        }
+
+        if (taskRequestDTO.getDueDate() != null && taskRequestDTO.getDueDate().before(new Date())) {
+            errorMessages.add("message.error.invalid.input.dueDate");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            throw new TaskRequestInputException(errorMessages);
+        }
+    }
+
+    private void validateUpdateTaskRequestParams(TaskRequestDTO taskRequestDTO) {
+        List<String> errorMessages = new ArrayList<>();
+
+        if (taskRequestDTO.getDueDate() != null && taskRequestDTO.getDueDate().before(new Date())) {
+            errorMessages.add("message.error.invalid.input.dueDate");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            throw new TaskRequestInputException(errorMessages);
+        }
+    }
+
 }

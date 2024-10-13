@@ -9,4 +9,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TaskResponseDTO extends GeneralResponseDTO {
     private TaskDTO task;
+    private String message;
 }
