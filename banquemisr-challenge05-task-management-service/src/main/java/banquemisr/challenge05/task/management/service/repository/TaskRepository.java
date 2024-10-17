@@ -24,7 +24,5 @@ public interface TaskRepository {
 
     List<Task> findByDueDateAndEmailNotificationNotSent(String dueDate);
 
-    Page<TaskHistory> findByTaskTitleAndDueDate(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, Pageable dueDate);
-
     List<Task> findAll();
 }

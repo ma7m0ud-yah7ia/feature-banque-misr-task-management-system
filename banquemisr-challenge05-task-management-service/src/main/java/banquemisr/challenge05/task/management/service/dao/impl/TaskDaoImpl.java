@@ -1,6 +1,7 @@
 package banquemisr.challenge05.task.management.service.dao.impl;
 
 import banquemisr.challenge05.task.management.service.dao.TaskDao;
+import banquemisr.challenge05.task.management.service.dto.PageDTO;
 import banquemisr.challenge05.task.management.service.enums.DateFormats;
 import banquemisr.challenge05.task.management.service.enums.TaskHistoryOperationType;
 import banquemisr.challenge05.task.management.service.enums.TaskPriority;
@@ -16,6 +17,9 @@ import banquemisr.challenge05.task.management.service.util.StringDateConverters;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +39,8 @@ public class TaskDaoImpl implements TaskDao {
     private final MessageSource messageSource;
 
 
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
     @Override
     public Task saveTask(Task task, String lang) {
         Task savedTask;
@@ -50,6 +56,8 @@ public class TaskDaoImpl implements TaskDao {
         }
     }
 
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
     @Override
     public Task updateTask(Task task, LoginUser loginUser, String lang) {
         Task updatedTask;
@@ -66,6 +74,8 @@ public class TaskDaoImpl implements TaskDao {
         }
     }
 
+    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
+            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
     @Override
     public Task deletTask(Task task, LoginUser user, String lang) {
         TaskHistory taskHistory = null;
@@ -81,24 +91,42 @@ public class TaskDaoImpl implements TaskDao {
         }
     }
 
+    @Cacheable(value = "tasks", keyGenerator = "customKeyGenerator")
     @Override
-    public Page<Task> findByTitleDescStatusPriorityDueDate(String taskTitle, String taskStatus, String
-            taskPriority, String taskDesc, Date taskDueDateFrom, Date taskDueDateTo, boolean isAdmin, boolean displayAll, LoginUser user, PageRequest pageRequest) {
-        return taskRepository.findByTitleDescStatusPriorityDueDate(taskTitle, taskStatus,
+    public PageDTO<Task> findByTitleDescStatusPriorityDueDate(String taskTitle, String taskStatus, String
+            taskPriority, String taskDesc, Date taskDueDateFrom, Date taskDueDateTo,
+                                                              boolean isAdmin, boolean displayAll, LoginUser user, PageRequest pageRequest) {
+        Page<Task> taskPage = taskRepository.findByTitleDescStatusPriorityDueDate(taskTitle, taskStatus,
                 taskPriority, taskDesc, taskDueDateFrom,
                 taskDueDateTo, isAdmin, displayAll, user, pageRequest);
+
+        return new PageDTO<>(
+                taskPage.getContent(),
+                taskPage.getNumber(),
+                taskPage.getSize(),
+                taskPage.getTotalElements(),
+                taskPage.getTotalPages(),
+                taskPage.isLast());
     }
 
+    @Cacheable(value = "taskHistory", keyGenerator = "customKeyGenerator")
     @Override
-    public Page<TaskHistory> findByTaskTitleAndDueDate(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, PageRequest pageRequest) {
-        return taskRepository.findByTaskTitleAndDueDate(taskTitle, taskDueDateFrom, taskDueDateTo, pageRequest);
+    public PageDTO<TaskHistory> findByTaskTitleAndDueDate(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, PageRequest pageRequest) {
+
+        Page<TaskHistory> taskHistoryPage = historyRepository.findByTaskTitleAndDueDate(taskTitle, taskDueDateFrom, taskDueDateTo, pageRequest);
+        return new PageDTO<>(
+                taskHistoryPage.getContent(),
+                taskHistoryPage.getNumber(),
+                taskHistoryPage.getSize(),
+                taskHistoryPage.getTotalElements(),
+                taskHistoryPage.getTotalPages(),
+                taskHistoryPage.isLast());
     }
 
     @Override
     public List<Task> findAll() {
         return taskRepository.findAll();
     }
-
 
     @Override
     public Optional<Task> findByExposedIdAndUser(String exposedId, LoginUser user) {

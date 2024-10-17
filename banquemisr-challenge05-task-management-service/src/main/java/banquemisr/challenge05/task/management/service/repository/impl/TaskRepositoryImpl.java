@@ -72,26 +72,6 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public Page<TaskHistory> findByTaskTitleAndDueDate(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, Pageable page) {
-        Query query = new Query();
-
-        if (taskDueDateFrom != null && taskDueDateTo != null)
-            query.addCriteria(Criteria.where("dueDate").gte(taskDueDateFrom).lt(taskDueDateTo));
-
-        if (taskTitle != null && !taskTitle.isEmpty())
-            query.addCriteria(Criteria.where("title").regex(taskTitle));
-
-        long totalCount = mongoTemplate.count(query, TaskHistory.class);
-
-        query.with(page);
-
-        List<TaskHistory> result = mongoTemplate.find(query, TaskHistory.class);
-
-        return PageableExecutionUtils.getPage(result, page, () -> totalCount);
-
-    }
-
-    @Override
     public List<Task> findAll() {
         return mongoTemplate.findAll(Task.class);
     }
