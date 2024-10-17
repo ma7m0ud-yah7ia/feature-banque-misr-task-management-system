@@ -49,8 +49,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     @Value("${spring.kafka.template.default-topic}")
     private String kafkaDefaultTopic;
 
-    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
-            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    @Override
     public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, String lang) {
 
         validateCreateTaskRequestParams(taskRequestDTO);
@@ -66,8 +65,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         return tasksResponseDTO;
     }
 
-    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
-            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    @Override
     public TaskResponseDTO updateTask(TaskRequestDTO taskRequestDTO, String lang) throws Exception {
 
         validateUpdateTaskRequestParams(taskRequestDTO);
@@ -89,9 +87,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         return tasksResponseDTO;
     }
 
-
-    @Caching(evict = {@CacheEvict(value = {"tasks"}, key = "customKeyGenerator", allEntries = true),
-            @CacheEvict(value = {"taskHistory"}, key = "customKeyGenerator", allEntries = true)})
+    @Override
     public TaskResponseDTO deleteTask(String exposedId, String lang) {
 
         // Admin can't delete the task.
@@ -109,13 +105,12 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     }
 
-    @Cacheable(value = "tasks", keyGenerator = "customKeyGenerator")
     @Override
     public TasksSearchResponseDTO getTaskByCriteria(String taskTitle, String taskStatus, String taskPriority, String taskDesc,
                                                     Date taskDueDateFrom, Date taskDueDateTo, boolean displayAll, int page, int sizePerPage) {
         int pageNumber = page - 1;
 
-        Page<Task> tasksPage = taskDao.findByTitleDescStatusPriorityDueDate(
+        PageDTO<Task> tasksPage = taskDao.findByTitleDescStatusPriorityDueDate(
                 taskTitle,
                 taskStatus,
                 taskPriority,
@@ -138,12 +133,11 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         return tasksSearchResponseDTO;
     }
 
-    @Cacheable(value = "taskHistory", keyGenerator = "customKeyGenerator")
     @Override
     public TasksHistorySearchResponseDTO getTaskHistoryByCriteria(String taskTitle, Date taskDueDateFrom, Date taskDueDateTo, int page, int sizePerPage) {
 
         int pageNumber = page - 1;
-        Page<TaskHistory> tasksPage = taskDao.findByTaskTitleAndDueDate(
+        PageDTO<TaskHistory> tasksPage = taskDao.findByTaskTitleAndDueDate(
                 taskTitle,
                 taskDueDateFrom, taskDueDateTo, PageRequest.of(pageNumber, sizePerPage, Sort.by("dueDate").descending()));
         TasksHistorySearchResponseDTO tasksHistorySearchResponseDTO = new TasksHistorySearchResponseDTO();

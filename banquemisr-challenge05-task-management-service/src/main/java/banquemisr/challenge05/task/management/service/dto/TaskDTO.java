@@ -12,6 +12,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class TaskDTO {
 
+    private String exposedId;
     private String title;
     private String description;
     private TaskStatus status;
